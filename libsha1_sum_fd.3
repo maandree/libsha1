@@ -1,0 +1,73 @@
+.TH LIBSHA1_SUM_FD 3 2019-02-10 libsha1
+.SH NAME
+libsha1_sum_fd \- Hash a file with a SHA 1/0 algorithm
+.SH SYNOPSIS
+.nf
+#include <libsha1.h>
+
+enum libsha1_algorithm {
+	LIBSHA1_0, /* SHA-0 */
+	LIBSHA1_1  /* SHA-1 */
+};
+
+int libsha1_sum_fd(int \fIfd\fP, enum libsha1_algorithm \fIalgorithm\fP, void *restrict \fIhashsum\fP);
+.fi
+.PP
+Link with
+.IR \-lsha1 .
+.SH DESCRIPTION
+The
+.BR libsha1_sum_fd ()
+function hashes the file with the
+file descriptor
+.I fd
+with the selected
+.IR algorithm .
+The resulting hash is stored in binary
+format in
+.IR hashsum .
+The user must make sure that
+.I hashsum
+is sufficiently large, which means at
+least the return value of the
+.BR libsha1_algorithm_output_size (3)
+function.
+.PP
+The
+.BR libsha1_behex_lower (3)
+and
+.BR libsha1_behex_upper (3)
+functions can be used to convert the
+result to hexadecimal format.
+.SH RETURN VALUE
+The
+.BR libsha1_sum_fd ()
+function returns 0 upon successful completion,
+otherwise -1 is returned and
+.I errno
+is set appropriately.
+.SH ERRORS
+The
+.BR libsha1_sum_fd ()
+function may fail for any reason specified for the
+.BR read (3)
+and
+.BR libsha1_init (3)
+functions.
+.SH EXAMPLES
+None.
+.SH APPLICATION USAGE
+None.
+.SH RATIONALE
+None.
+.SH FUTURE DIRECTIONS
+None.
+.SH NOTES
+None.
+.SH BUGS
+None.
+.SH SEE ALSO
+.BR libsha1_algorithm_output_size (3),
+.BR libsha1_behex_lower (3),
+.BR libsha1_behex_upper (3),
+.BR libsha1_init (3)

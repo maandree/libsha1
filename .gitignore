@@ -1,0 +1,12 @@
+*\#*
+*~
+*.bak
+*.swp
+*.swo
+*.out
+*.o
+*.so
+*.su
+*.a
+*.lo
+/test

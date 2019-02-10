@@ -1,0 +1,70 @@
+.TH LIBSHA1_DIGEST 3 2019-02-10 libsha1
+.SH NAME
+libsha1_digest \- Get the result of a SHA 1/0 hashing
+.SH SYNOPSIS
+.nf
+#include <libsha1.h>
+
+void libsha1_digest(struct libsha1_state *restrict \fIstate\fP, const void *\fImessage\fP, size_t \fImsglen\fP, void *\fIoutput\fP);
+.fi
+.PP
+Link with
+.IR \-lsha1 .
+.SH DESCRIPTION
+The
+.BR libsha1_digest ()
+function feeds the first
+.I msglen
+.B bits
+of
+.I message
+into the hashing state of the
+.I state
+parameter, and finalises the hashing.
+The resulting hash is stored in binary
+format in
+.IR output .
+The user must make sure that
+.I output
+is sufficiently large, which means at
+least the return value of the
+.BR libsha1_state_output_size (3)
+function.
+.PP
+If 
+.I msglen
+is not a multiple of 8, the lowest
+.I msglen%8
+bits from the last by in
+.I message
+is used as the complete byte.
+.PP
+The
+.BR libsha1_behex_lower (3)
+and
+.BR libsha1_behex_upper (3)
+functions can be used to convert the
+result to hexadecimal format.
+.SH RETURN VALUE
+None.
+.SH ERRORS
+None.
+.SH EXAMPLES
+None.
+.SH APPLICATION USAGE
+None.
+.SH RATIONALE
+None.
+.SH FUTURE DIRECTIONS
+None.
+.SH NOTES
+None.
+.SH BUGS
+None.
+.SH SEE ALSO
+.BR libsha1_behex_lower (3),
+.BR libsha1_behex_upper (3),
+.BR libsha1_init (3),
+.BR libsha1_state_output_size (3),
+.BR libsha1_sum_fd (3),
+.BR libsha1_update (3)

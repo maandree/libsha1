@@ -1,0 +1,45 @@
+/* See LICENSE file for copyright and license details. */
+#include "common.h"
+
+
+/**
+ * Calculate the checksum for a file,
+ * the content of the file is assumed non-sensitive
+ * 
+ * @param   fd         The file descriptor of the file
+ * @param   algorithm  The hashing algorithm
+ * @param   hashsum    Output buffer for the hash
+ * @return             Zero on success, -1 on error
+ */
+int
+libsha1_sum_fd(int fd, enum libsha1_algorithm algorithm, void *restrict hashsum)
+{
+	struct libsha1_state state;
+	ssize_t r;
+	struct stat attr;
+	size_t blksize = 4096;
+	char *restrict chunk;
+
+	if (libsha1_init(&state, algorithm) < 0)
+		return -1;
+
+	if (fstat(fd, &attr) == 0 && attr.st_blksize > 0)
+		blksize = (size_t)(attr.st_blksize);
+
+	chunk = alloca(blksize);
+
+	for (;;) {
+		r = read(fd, chunk, blksize);
+		if (r <= 0) {
+			if (!r)
+				break;
+			if (errno == EINTR)
+				continue;
+			return -1;
+		}
+		libsha1_update(&state, chunk, (size_t)r * 8);
+	}
+
+	libsha1_digest(&state, NULL, 0, hashsum);
+	return 0;
+}

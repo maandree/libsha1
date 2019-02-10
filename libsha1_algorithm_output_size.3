@@ -1,0 +1,53 @@
+.TH LIBSHA1_ALGORITHM_OUTPUT_SIZE 3 2019-02-10 libsha1
+.SH NAME
+libsha1_algorithm_output_size \- Get the size of the output for a SHA 1/0 algorithm
+.SH SYNOPSIS
+.nf
+#include <libsha1.h>
+
+size_t libsha1_algorithm_output_size(enum libsha1_algorithm \fIalgorithm\fP);
+.fi
+.PP
+Link with
+.IR \-lsha1 .
+.SH DESCRIPTION
+The
+.BR libsha1_algorithm_output_size ()
+function get the output size for the
+binary output of the hash algorithm
+selected for the selected
+.IR algorithm .
+.SH RETURN VALUE
+The
+.BR libsha1_algorithm_output_size ()
+function returns the output size in bytes,
+a positive number upon successful completion,
+otherwise 0 is returned and
+.I errno
+is set appropriately.
+.SH ERRORS
+The
+.BR libsha1_algorithm_output_size ()
+function will fail if:
+.TP
+.B EINVAL
+.I algorithm
+is not a valid
+.B enum libsha1_algorithm
+value.
+.SH EXAMPLES
+None.
+.SH APPLICATION USAGE
+None.
+.SH RATIONALE
+None.
+.SH FUTURE DIRECTIONS
+None.
+.SH NOTES
+None.
+.SH BUGS
+Both GCC and Clang optimises out setting
+.I errno
+if using too high optimisation.
+.SH SEE ALSO
+.BR libsha1_state_output_size (3)

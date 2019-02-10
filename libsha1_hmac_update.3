@@ -1,0 +1,42 @@
+.TH LIBSHA1_HMAC_UPDATE 3 2019-02-10 libsha1
+.SH NAME
+libsha1_hmac_update \- Feed data into a HMAC-SHA 1/0 algorithm
+.SH SYNOPSIS
+.nf
+#include <libsha1.h>
+
+void libsha1_hmac_update(struct libsha1_hmac_state *restrict \fIstate\fP, const void *restrict \fImessage\fP, size_t \fImsglen\fP);
+.fi
+.PP
+Link with
+.IR \-lsha1 .
+.SH DESCRIPTION
+The
+.BR libsha1_hmac_update ()
+function feeds the first
+.I msglen
+.B bits
+(must equivalent to 0 modulus 8) of
+.I message
+into the hashing state of the
+.I state
+parameter.
+.SH RETURN VALUE
+None.
+.SH ERRORS
+None.
+.SH EXAMPLES
+None.
+.SH APPLICATION USAGE
+None.
+.SH RATIONALE
+None.
+.SH FUTURE DIRECTIONS
+None.
+.SH NOTES
+None.
+.SH BUGS
+None.
+.SH SEE ALSO
+.BR libsha1_hmac_digest (3),
+.BR libsha1_hmac_init (3)

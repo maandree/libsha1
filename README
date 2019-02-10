@@ -1,0 +1,12 @@
+NAME
+	libsha1 - SHA-1 and SHA-0 hashing library
+
+DESCRIPTION
+	libsha1 is a bit-oriented implementation of the SHA-1
+	and SHA-0 algorithm
+
+RATIONALE
+	This should be obvious.
+
+SEE ALSO
+	libkeccak(7), libsha2(7), sha1sum(1)

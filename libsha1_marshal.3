@@ -1,0 +1,56 @@
+.TH LIBSHA1_MARSHAL 3 2019-02-10 libsha1
+.SH NAME
+libsha1_marshal \- Marshal a SHA 1/0 hashing state
+.SH SYNOPSIS
+.nf
+#include <libsha1.h>
+
+size_t libsha1_marshal(const struct libsha1_state *restrict \fIstate\fP, void *restrict \fIbuf\fP);
+.fi
+.PP
+Link with
+.IR \-lsha1 .
+.SH DESCRIPTION
+The
+.BR libsha1_marshal ()
+function marshal
+.I state
+into the buffer
+.IR buf .
+If the function is called with
+.I NULL
+as
+.IR buf ,
+the required size for
+.I buf
+is returned.
+.PP
+A version number is marshalled into
+.IR buf ,
+this allows new versions of the library to
+unmarshal states marshalled by older versions.
+.SH RETURN VALUE
+The
+.BR libsha1_marshal ()
+function returns the number of marshalled
+bytes (or if
+.I buf
+is
+.IR NULL ,
+the number of bytes that would have been marshalled).
+.SH ERRORS
+None.
+.SH EXAMPLES
+None.
+.SH APPLICATION USAGE
+None.
+.SH RATIONALE
+None.
+.SH FUTURE DIRECTIONS
+None.
+.SH NOTES
+None.
+.SH BUGS
+None.
+.SH SEE ALSO
+.BR libsha1_unmarshal (3)

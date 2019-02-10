@@ -1,0 +1,62 @@
+.TH LIBSHA1_INIT 3 2019-02-10 libsha1
+.SH NAME
+libsha1_init \- Initialises hashing with a SHA 1/0 algorithm
+.SH SYNOPSIS
+.nf
+#include <libsha1.h>
+
+enum libsha1_algorithm {
+	LIBSHA1_0, /* SHA-0 */
+	LIBSHA1_1  /* SHA-1 */
+};
+
+int libsha1_init(struct libsha1_state *restrict \fIstate\fP, enum libsha1_algorithm \fIalgorithm\fP);
+.fi
+.PP
+Link with
+.IR \-lsha1 .
+.SH DESCRIPTION
+The
+.BR libsha1_init ()
+function stores the selected
+.I algorithm
+in
+.I state
+and initialises
+.I state
+accordingly with the initial hashing state.
+.SH RETURN VALUE
+The
+.BR libsha1_init ()
+function returns 0 upon successful completion,
+otherwise -1 is returned and
+.I errno
+is set appropriately.
+.SH ERRORS
+The
+.BR libsha1_init ()
+function will fail if:
+.TP
+.B EINVAL
+.I algorithm
+is not a valid
+.B enum libsha1_algorithm
+value.
+.SH EXAMPLES
+None.
+.SH APPLICATION USAGE
+None.
+.SH RATIONALE
+None.
+.SH FUTURE DIRECTIONS
+None.
+.SH NOTES
+None.
+.SH BUGS
+None.
+.SH SEE ALSO
+.BR libsha1_digest (3),
+.BR libsha1_marshal (3),
+.BR libsha1_sum_fd (3),
+.BR libsha1_unmarshal (3),
+.BR libsha1_update (3)

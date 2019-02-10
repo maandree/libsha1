@@ -30,12 +30,12 @@ libsha1_hmac_marshal(const struct libsha1_hmac_state *restrict state, void *rest
 	off += sizeof(unsigned char);
 
 	if (buf)
-		memcpy(&buf[off], state->ipad, state->sha1_state.chunk_size);
-	off += state->sha1_state.chunk_size;
+		memcpy(&buf[off], state->ipad, sizeof(state->ipad));
+	off += sizeof(state->ipad);
 
 	if (buf)
-		memcpy(&buf[off], state->opad, state->sha1_state.chunk_size);
-	off += state->sha1_state.chunk_size;
+		memcpy(&buf[off], state->opad, sizeof(state->opad));
+	off += sizeof(state->opad);
 
 	return off;
 }

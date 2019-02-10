@@ -3,16 +3,9 @@
 
 
 /**
- * Initial state for SHA-0
+ * Initial state for SHA-1 and SHA-0
  */
-static const uint32_t H_0[] = {
-	0, 0, 0, 0, 0
-};
-
-/**
- * Initial state for SHA_1
- */
-static const uint32_t H_1[] = {
+static const uint32_t H[] = {
 	0x67452301UL, 0xEFCDAB89UL, 0x98BADCFEUL, 0x10325476UL, 0xC3D2E1F0UL
 };
 
@@ -33,14 +26,13 @@ libsha1_init(struct libsha1_state *restrict state, enum libsha1_algorithm algori
 
 	/* Set initial hash values. */
 	switch (algorithm) {
-	case LIBSHA1_0: memcpy(state->h, H_0, sizeof(H_0)); break;
-	case LIBSHA1_1: memcpy(state->h, H_1, sizeof(H_1)); break;
+	case LIBSHA1_0:
+	case LIBSHA1_1:
+		memcpy(state->h, H, sizeof(H)); break;
 	default:
 		errno = EINVAL;
 		return -1;
 	}
 
-	state->chunk_size = 64;
-  
 	return 0;
 }

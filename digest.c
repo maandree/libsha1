@@ -23,7 +23,7 @@ libsha1_digest(struct libsha1_state *restrict state, const void *message_, size_
 		msglen &= (size_t)7;
 	}
 
-	off = (state->message_size / 8) % state->chunk_size;
+	off = (state->message_size / 8) % sizeof(state->chunk);
 	if (msglen) {
 		state->chunk[off] = (unsigned char)(*message << (8 - (int)msglen));
 		state->chunk[off] |= (unsigned char)(1 << (7 - msglen));
@@ -34,21 +34,21 @@ libsha1_digest(struct libsha1_state *restrict state, const void *message_, size_
 	}
 	off += 1;
 
-	if (off > state->chunk_size - (size_t)8) {
-		memset(state->chunk + off, 0, state->chunk_size - off);
+	if (off > sizeof(state->chunk) - (size_t)8) {
+		memset(state->chunk + off, 0, sizeof(state->chunk) - off);
 		off = 0;
 		libsha1_process(state, state->chunk);
 	}
 
-	memset(state->chunk + off, 0, state->chunk_size - 8 - off);
-	state->chunk[state->chunk_size - 8] = (unsigned char)(state->message_size >> 56);
-	state->chunk[state->chunk_size - 7] = (unsigned char)(state->message_size >> 48);
-	state->chunk[state->chunk_size - 6] = (unsigned char)(state->message_size >> 40);
-	state->chunk[state->chunk_size - 5] = (unsigned char)(state->message_size >> 32);
-	state->chunk[state->chunk_size - 4] = (unsigned char)(state->message_size >> 24);
-	state->chunk[state->chunk_size - 3] = (unsigned char)(state->message_size >> 16);
-	state->chunk[state->chunk_size - 2] = (unsigned char)(state->message_size >>  8);
-	state->chunk[state->chunk_size - 1] = (unsigned char)(state->message_size >>  0);
+	memset(state->chunk + off, 0, sizeof(state->chunk) - 8 - off);
+	state->chunk[sizeof(state->chunk) - 8] = (unsigned char)(state->message_size >> 56);
+	state->chunk[sizeof(state->chunk) - 7] = (unsigned char)(state->message_size >> 48);
+	state->chunk[sizeof(state->chunk) - 6] = (unsigned char)(state->message_size >> 40);
+	state->chunk[sizeof(state->chunk) - 5] = (unsigned char)(state->message_size >> 32);
+	state->chunk[sizeof(state->chunk) - 4] = (unsigned char)(state->message_size >> 24);
+	state->chunk[sizeof(state->chunk) - 3] = (unsigned char)(state->message_size >> 16);
+	state->chunk[sizeof(state->chunk) - 2] = (unsigned char)(state->message_size >>  8);
+	state->chunk[sizeof(state->chunk) - 1] = (unsigned char)(state->message_size >>  0);
 	libsha1_process(state, state->chunk);
 
 	n = libsha1_algorithm_output_size(state->algorithm);

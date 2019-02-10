@@ -140,35 +140,13 @@ main(int argc, char *argv[])
 	test(libsha1_init(&s, ~0) == -1 && errno == EINVAL);
 	errno = 0;
 
-#ifdef TODO
-	test(!libsha1_init(&s, LIBSHA1_0));
-	test(libsha1_state_output_size(&s) == 20);
-	libsha1_digest(&s, "", 0, buf);
-	libsha1_behex_lower(str, buf, libsha1_state_output_size(&s));
-	test_str(str, "");
-#endif
-
 	test(!libsha1_init(&s, LIBSHA1_1));
 	test(libsha1_state_output_size(&s) == 20);
 	libsha1_digest(&s, "", 0, buf);
 	libsha1_behex_lower(str, buf, libsha1_state_output_size(&s));
 	test_str(str, "da39a3ee5e6b4b0d3255bfef95601890afd80709");
 
-#ifdef TODO
-	test_repeated(0xFF, 1, LIBSHA1_0, "");
-	test_custom("\xE5\xE0\x99\x24", LIBSHA1_0, "");
-	test_repeated(0x00, 56, LIBSHA1_0, "");
-	test_repeated(0x51, 1000, LIBSHA1_0, "");
-	test_repeated(0x41, 1000, LIBSHA1_0, "");
-	test_repeated(0x99, 1005, LIBSHA1_0, "");
-	test_repeated_huge(0x00, 1000000UL, LIBSHA1_0, "");
-	test_repeated_huge(0x41, 0x20000000UL, LIBSHA1_0, "");
-	test_repeated_huge(0x00, 0x41000000UL, LIBSHA1_0, "");
-	test_repeated_huge(0x84, 0x6000003FUL, LIBSHA1_0, "");
-	test_custom("abc", LIBSHA1_0, "");
-	test_custom("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq", LIBSHA1_1,
-	            "");
-#endif
+	test_custom("abc", LIBSHA1_0, "0164b8a914cd2a5e74c4f7ff082c4d97f1edf880");
 
 	test_repeated(0xFF, 1, LIBSHA1_1, "85e53271e14006f0265921d02d4d736cdc580b0b");
 	test_custom("\xE5\xE0\x99\x24", LIBSHA1_1, "d1dffbc8a175dd8eebe0da87b1792b6dc1018e82");
@@ -185,20 +163,13 @@ main(int argc, char *argv[])
 	            "84983e441c3bd26ebaae4aa1f95129e5e54670f1");
 
 	for (i = 0; i < 1000; i++) {
-#ifdef TODO
-		for (j = 0; j < 2; j++) {
-#else
 		for (j = 1; j < 2; j++) {
-#endif
 			memset(buf, 0x41, 1000);
 			test(!libsha1_init(&s, (enum libsha1_algorithm)j));
 			libsha1_update(&s, buf, i * 8);
 			libsha1_digest(&s, buf, (1000 - i) * 8, buf);
 			libsha1_behex_lower(str, buf, libsha1_state_output_size(&s));
-			test_str(str, ((const char *[]){
-				"",
-				"3ae3644d6777a1f56a1defeabc74af9c4b313e49"
-			})[j]);
+			test_str(str, "3ae3644d6777a1f56a1defeabc74af9c4b313e49");
 
 			memset(buf, 0x41, 1000);
 			test(!libsha1_init(&s, (enum libsha1_algorithm)j));
@@ -206,10 +177,7 @@ main(int argc, char *argv[])
 			libsha1_update(&s, buf, (1000 - i) * 8);
 			libsha1_digest(&s, NULL, 0, buf);
 			libsha1_behex_lower(str, buf, libsha1_state_output_size(&s));
-			test_str(str, ((const char *[]){
-				"",
-				"3ae3644d6777a1f56a1defeabc74af9c4b313e49"
-			})[j]);
+			test_str(str, "3ae3644d6777a1f56a1defeabc74af9c4b313e49");
 
 			if (!i)
 				continue;
@@ -225,10 +193,7 @@ main(int argc, char *argv[])
 			}
 			libsha1_digest(&s, buf, (1000 - n) * 8, buf);
 			libsha1_behex_lower(str, buf, libsha1_state_output_size(&s));
-			test_str(str, ((const char *[]){
-				"",
-				"3ae3644d6777a1f56a1defeabc74af9c4b313e49"
-			})[j]);
+			test_str(str, "3ae3644d6777a1f56a1defeabc74af9c4b313e49");
 		}
 	}
 

@@ -54,11 +54,6 @@ struct libsha1_state {
 	unsigned char chunk[64];
 
 	/**
-	 * The size of the chunks, in bytes
-	 */
-	size_t chunk_size;
-
-	/**
 	 * The algorithm that is used
 	 */
 	enum libsha1_algorithm algorithm;
@@ -98,12 +93,12 @@ struct libsha1_hmac_state {
 	/**
 	 * Inner pad XOR processed key
 	 */
-	unsigned char ipad[128];
+	unsigned char ipad[64];
 
 	/**
 	 * Outer pad XOR processed key
 	 */
-	unsigned char opad[128];
+	unsigned char opad[64];
 };
 
 

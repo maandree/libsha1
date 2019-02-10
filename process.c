@@ -36,8 +36,13 @@ libsha1_process(struct libsha1_state *restrict state, const unsigned char *restr
 		state->w[i] |= (uint32_t)chunk[4 * i + 2] <<  8;
 		state->w[i] |= (uint32_t)chunk[4 * i + 3];
 	}
-	for (; i < 80; i++)
-		state->w[i] = rorl(state->w[i - 3] ^ state->w[i - 8] ^ state->w[i - 14] ^ state->w[i - 16], 1);
+	if (state->algorithm == LIBSHA1_1) {
+		for (; i < 80; i++)
+			state->w[i] = rorl(state->w[i - 3] ^ state->w[i - 8] ^ state->w[i - 14] ^ state->w[i - 16], 1);
+	} else {
+		for (; i < 80; i++)
+			state->w[i] = state->w[i - 3] ^ state->w[i - 8] ^ state->w[i - 14] ^ state->w[i - 16];
+	}
 	a = state->h[0];
 	b = state->h[1];
 	c = state->h[2];

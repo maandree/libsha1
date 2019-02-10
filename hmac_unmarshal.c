@@ -33,7 +33,7 @@ libsha1_hmac_unmarshal(struct libsha1_hmac_state *restrict state, const void *re
 		return 0;
 	off += r;
 
-	if (bufsize - off < sizeof(size_t) + sizeof(unsigned char) + 2 * state->sha1_state.chunk_size) {
+	if (bufsize - off < sizeof(size_t) + sizeof(unsigned char) + sizeof(state->ipad) + sizeof(state->opad)) {
 		errno = EINVAL;
 		return 0;
 	}
@@ -44,11 +44,11 @@ libsha1_hmac_unmarshal(struct libsha1_hmac_state *restrict state, const void *re
 	state->inited = *(const unsigned char *)&buf[off];
 	off += sizeof(unsigned char);
 
-	memcpy(state->ipad, &buf[off], state->sha1_state.chunk_size);
-	off += state->sha1_state.chunk_size;
+	memcpy(state->ipad, &buf[off], sizeof(state->ipad));
+	off += sizeof(state->ipad);
 
-	memcpy(state->opad, &buf[off], state->sha1_state.chunk_size);
-	off += state->sha1_state.chunk_size;
+	memcpy(state->opad, &buf[off], sizeof(state->opad));
+	off += sizeof(state->opad);
 
 	return off;
 }

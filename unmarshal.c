@@ -41,19 +41,12 @@ libsha1_unmarshal(struct libsha1_state *restrict state, const void *restrict buf
 	memcpy(state->h, &buf[off], sizeof(state->h));
 	off += sizeof(state->h);
 
-	if (bufsize - off < sizeof(size_t)) {
+	if (bufsize - off < (state->message_size / 8) % sizeof(state->chunk)) {
 		errno = EINVAL;
 		return 0;
 	}
-	state->chunk_size = *(const size_t *)&buf[off];
-	off += sizeof(size_t);
-
-	if (bufsize - off < (state->message_size / 8) % state->chunk_size) {
-		errno = EINVAL;
-		return 0;
-	}
-	memcpy(state->chunk, &buf[off], (state->message_size / 8) % state->chunk_size);
-	off += (state->message_size / 8) % state->chunk_size;
+	memcpy(state->chunk, &buf[off], (state->message_size / 8) % sizeof(state->chunk));
+	off += (state->message_size / 8) % sizeof(state->chunk);
 
 	return off;
 }

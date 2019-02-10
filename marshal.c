@@ -33,11 +33,8 @@ libsha1_marshal(const struct libsha1_state *restrict state, void *restrict buf_)
 	off += sizeof(state->h);
 
 	if (buf)
-		*(size_t *)&buf[off] = state->chunk_size;
-	off += sizeof(size_t);
-	if (buf)
-		memcpy(&buf[off], state->chunk, (state->message_size / 8) % state->chunk_size);
-	off += (state->message_size / 8) % state->chunk_size;
+		memcpy(&buf[off], state->chunk, (state->message_size / 8) % sizeof(state->chunk));
+	off += (state->message_size / 8) % sizeof(state->chunk);
 
 	return off;
 }

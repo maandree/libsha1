@@ -28,7 +28,8 @@ libsha1_init(struct libsha1_state *restrict state, enum libsha1_algorithm algori
 	switch (algorithm) {
 	case LIBSHA1_0:
 	case LIBSHA1_1:
-		memcpy(state->h, H, sizeof(H)); break;
+		memcpy(state->h, H, sizeof(H));
+		break;
 	default:
 		errno = EINVAL;
 		return -1;

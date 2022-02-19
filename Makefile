@@ -1,16 +1,19 @@
-.NONPOSIX:
+.POSIX:
 
 CONFIGFILE = config.mk
+include $(CONFIGFILE)
 
-OSCONFIGFILE = linux.mk
-# Change to macos.mk for Mac OS
+OS = linux
+# Linux:   linux
+# Mac OS:  macos
+# Windows: windows
+include mk/$(OS).mk
+
 
 LIB_MAJOR = 1
 LIB_MINOR = 0
 LIB_VERSION = $(LIB_MAJOR).$(LIB_MINOR)
 
-include $(CONFIGFILE)
-include $(OSCONFIGFILE)
 
 HDR =\
 	libsha1.h\
@@ -34,7 +37,7 @@ OBJ =\
 	sum_fd.o\
 	unhex.o\
 	unmarshal.o\
-	update.o\
+	update.o
 
 MAN0 =\
 	libsha1.h.0
@@ -92,6 +95,7 @@ install: libsha1.a libsha1.$(LIBEXT)
 	mkdir -p -- "$(DESTDIR)$(MANPREFIX)/man3"
 	cp -- libsha1.a "$(DESTDIR)$(PREFIX)/lib"
 	cp -- libsha1.$(LIBEXT) "$(DESTDIR)$(PREFIX)/lib/libsha1.$(LIBMINOREXT)"
+	$(FIX_INSTALL_NAME) -- "$(DESTDIR)$(PREFIX)/lib/libsha1.$(LIBMINOREXT)"
 	ln -sf -- "libsha1.$(LIBMINOREXT).$(LIB_MINOR)" "$(DESTDIR)$(PREFIX)/lib/libsha1.$(LIBMAJOREXT)"
 	ln -sf -- "libsha1.$(LIBMAJOREXT)" "$(DESTDIR)$(PREFIX)/lib/libsha1.$(LIBEXT)"
 	cp -- libsha1.h "$(DESTDIR)$(PREFIX)/include"

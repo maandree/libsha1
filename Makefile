@@ -95,7 +95,7 @@ install: libsha1.a libsha1.$(LIBEXT)
 	mkdir -p -- "$(DESTDIR)$(MANPREFIX)/man3"
 	cp -- libsha1.a "$(DESTDIR)$(PREFIX)/lib"
 	cp -- libsha1.$(LIBEXT) "$(DESTDIR)$(PREFIX)/lib/libsha1.$(LIBMINOREXT)"
-	$(FIX_INSTALL_NAME) -- "$(DESTDIR)$(PREFIX)/lib/libsha1.$(LIBMINOREXT)"
+	$(FIX_INSTALL_NAME) "$(DESTDIR)$(PREFIX)/lib/libsha1.$(LIBMINOREXT)"
 	ln -sf -- "libsha1.$(LIBMINOREXT).$(LIB_MINOR)" "$(DESTDIR)$(PREFIX)/lib/libsha1.$(LIBMAJOREXT)"
 	ln -sf -- "libsha1.$(LIBMAJOREXT)" "$(DESTDIR)$(PREFIX)/lib/libsha1.$(LIBEXT)"
 	cp -- libsha1.h "$(DESTDIR)$(PREFIX)/include"

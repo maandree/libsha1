@@ -4,9 +4,15 @@
 #include <sys/stat.h>
 #include <alloca.h>
 #include <errno.h>
+#include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
 #include <unistd.h>
+
+
+#ifndef ALLOCA_LIMIT
+# define ALLOCA_LIMIT 0
+#endif
 
 
 /**

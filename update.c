@@ -21,7 +21,7 @@ libsha1_update(struct libsha1_state *restrict state, const void *restrict messag
 
 	if (off) {
 		n = msglen < sizeof(state->chunk) - off ? msglen : sizeof(state->chunk) - off;
-		memcpy(state->chunk + off, message, n);
+		memcpy(&state->chunk[off], message, n);
 		if (off + n == sizeof(state->chunk))
 			libsha1_process(state, state->chunk);
 		message += n;

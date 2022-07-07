@@ -65,6 +65,7 @@ MAN7 =\
 	libsha1.7
 
 LOBJ = $(OBJ:.o=.lo)
+SRC = $(OBJ:.o=.c)
 
 
 all: libsha1.a libsha1.$(LIBEXT) test
@@ -118,7 +119,7 @@ uninstall:
 	-cd -- "$(DESTDIR)$(MANPREFIX)/man7" && rm -f -- $(MAN7)
 
 clean:
-	-rm -f -- *.o *.lo *.su *.a *.so test
+	-rm -f -- *.o *.lo *.su *.a *.so *.gcda *.gcno *.gcov test
 
 .SUFFIXES:
 .SUFFIXES: .lo .o .c

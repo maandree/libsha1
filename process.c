@@ -9,12 +9,6 @@ rorl(uint32_t n, int k)
 }
 
 
-/**
- * Process a chunk using SHA-1 or SHA-0
- * 
- * @param  state  The hashing state
- * @param  chunk  The data to process
- */
 void
 libsha1_process(struct libsha1_state *restrict state, const unsigned char *restrict chunk)
 {

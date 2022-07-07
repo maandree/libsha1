@@ -2,20 +2,6 @@
 #include "common.h"
 
 
-/**
- * Feed data into the HMAC algorithm and
- * get the result
- * 
- * The state of the algorithm will be reset and
- * `libsha1_hmac_update` and `libsha1_hmac_update`
- * can be called again
- * 
- * @param  state   The state of the algorithm
- * @param  data    Data to feed into the algorithm
- * @param  n       The number of bytes to feed into the algorithm
- * @param  output  The output buffer for the hash, it will be as
- *                 large as for the underlaying hash algorithm
- */
 void
 libsha1_hmac_digest(struct libsha1_hmac_state *restrict state, const void *data, size_t n, void *output)
 {

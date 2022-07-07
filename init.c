@@ -10,13 +10,6 @@ static const uint32_t H[] = {
 };
 
 
-/**
- * Initialise a state
- * 
- * @param   state      The state that should be initialised
- * @param   algorithm  The hashing algorithm
- * @return             Zero on success, -1 on error
- */
 int
 libsha1_init(struct libsha1_state *restrict state, enum libsha1_algorithm algorithm)
 {

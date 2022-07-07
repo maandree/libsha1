@@ -27,10 +27,12 @@
 /**
  * Process a chunk using SHA-1 or SHA-0
  * 
- * @param  state  The hashing state
- * @param  chunk  The data to process
+ * @param   state  The hashing state
+ * @param   data   The data to process
+ * @param   len    The number of available bytes
+ * @return         The number of processed bytes
  */
 #if defined(__GNUC__)
 __attribute__((__nonnull__, __nothrow__))
 #endif
-void libsha1_process(struct libsha1_state *restrict, const unsigned char *restrict);
+size_t libsha1_process(struct libsha1_state *restrict, const unsigned char *restrict, size_t);

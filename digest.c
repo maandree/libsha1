@@ -29,7 +29,7 @@ libsha1_digest(struct libsha1_state *restrict state, const void *message_, size_
 	if (off > sizeof(state->chunk) - (size_t)8) {
 		memset(state->chunk + off, 0, sizeof(state->chunk) - off);
 		off = 0;
-		libsha1_process(state, state->chunk);
+		libsha1_process(state, state->chunk, sizeof(state->chunk));
 	}
 
 	memset(state->chunk + off, 0, sizeof(state->chunk) - 8 - off);
@@ -41,7 +41,7 @@ libsha1_digest(struct libsha1_state *restrict state, const void *message_, size_
 	state->chunk[sizeof(state->chunk) - 3] = (unsigned char)(state->message_size >> 16);
 	state->chunk[sizeof(state->chunk) - 2] = (unsigned char)(state->message_size >>  8);
 	state->chunk[sizeof(state->chunk) - 1] = (unsigned char)(state->message_size >>  0);
-	libsha1_process(state, state->chunk);
+	libsha1_process(state, state->chunk, sizeof(state->chunk));
 
 	n = libsha1_algorithm_output_size(state->algorithm);
 	for (i = 0, n /= 4; i < n; i++) {

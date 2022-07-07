@@ -1,6 +1,15 @@
 /* See LICENSE file for copyright and license details. */
 #include "common.h"
 
+#if defined(__SSE4_1__) && defined(__SSSE3__) && defined(__SSE2__) && defined(__SHA__)
+# define HAVE_X86_SHA_INTRINSICS
+#endif
+
+
+#ifdef HAVE_X86_SHA_INTRINSICS
+# include <immintrin.h>
+#endif
+
 
 static inline uint_least32_t
 rorl(uint_least32_t n, int k)
@@ -8,9 +17,8 @@ rorl(uint_least32_t n, int k)
 	return TRUNC32((n << k) | (n >> (32 - k)));
 }
 
-
-void
-libsha1_process(struct libsha1_state *restrict state, const unsigned char *restrict chunk)
+static size_t
+process_portable(struct libsha1_state *restrict state, const unsigned char *restrict data, size_t len)
 {
 #define F0(B, C, D) (D ^ (B & (C ^ D)))
 #define F1(B, C, D) (B ^ C ^ D)
@@ -24,58 +32,66 @@ libsha1_process(struct libsha1_state *restrict state, const unsigned char *restr
 
 	uint_least32_t a, b, c, d, e;
 	int i;
+	size_t off = 0;
 
-	for (i = 0; i < 16; i++) {
-		state->w[i]  = (uint_least32_t)chunk[4 * i + 0] << 24;
-		state->w[i] |= (uint_least32_t)chunk[4 * i + 1] << 16;
-		state->w[i] |= (uint_least32_t)chunk[4 * i + 2] <<  8;
-		state->w[i] |= (uint_least32_t)chunk[4 * i + 3];
+	for (; len >= off + sizeof(state->chunk); off += sizeof(state->chunk)) {
+		for (i = 0; i < 16; i++) {
+			state->w[i]  = (uint_least32_t)data[off + 4 * i + 0] << 24;
+			state->w[i] |= (uint_least32_t)data[off + 4 * i + 1] << 16;
+			state->w[i] |= (uint_least32_t)data[off + 4 * i + 2] <<  8;
+			state->w[i] |= (uint_least32_t)data[off + 4 * i + 3];
+		}
+		if (state->algorithm == LIBSHA1_1) {
+			for (; i < 80; i++)
+				state->w[i] = rorl(state->w[i - 3] ^ state->w[i - 8] ^ state->w[i - 14] ^ state->w[i - 16], 1);
+		} else {
+			for (; i < 80; i++)
+				state->w[i] = state->w[i - 3] ^ state->w[i - 8] ^ state->w[i - 14] ^ state->w[i - 16];
+		}
+
+		a = state->h[0];
+		b = state->h[1];
+		c = state->h[2];
+		d = state->h[3];
+		e = state->h[4];
+
+		for (i = 0; i < 20;) {
+			G0(a, b, c, d, e, i++);
+			G0(e, a, b, c, d, i++);
+			G0(d, e, a, b, c, i++);
+			G0(c, d, e, a, b, i++);
+			G0(b, c, d, e, a, i++);
+		}
+		while (i < 40) {
+			G1(a, b, c, d, e, i++);
+			G1(e, a, b, c, d, i++);
+			G1(d, e, a, b, c, i++);
+			G1(c, d, e, a, b, i++);
+			G1(b, c, d, e, a, i++);
+		}
+		while (i < 60) {
+			G2(a, b, c, d, e, i++);
+			G2(e, a, b, c, d, i++);
+			G2(d, e, a, b, c, i++);
+			G2(c, d, e, a, b, i++);
+			G2(b, c, d, e, a, i++);
+		}
+		while (i < 80) {
+			G3(a, b, c, d, e, i++);
+			G3(e, a, b, c, d, i++);
+			G3(d, e, a, b, c, i++);
+			G3(c, d, e, a, b, i++);
+			G3(b, c, d, e, a, i++);
+		}
+
+		state->h[0] = TRUNC32(state->h[0] + a);
+		state->h[1] = TRUNC32(state->h[1] + b);
+		state->h[2] = TRUNC32(state->h[2] + c);
+		state->h[3] = TRUNC32(state->h[3] + d);
+		state->h[4] = TRUNC32(state->h[4] + e);
 	}
-	if (state->algorithm == LIBSHA1_1) {
-		for (; i < 80; i++)
-			state->w[i] = rorl(state->w[i - 3] ^ state->w[i - 8] ^ state->w[i - 14] ^ state->w[i - 16], 1);
-	} else {
-		for (; i < 80; i++)
-			state->w[i] = state->w[i - 3] ^ state->w[i - 8] ^ state->w[i - 14] ^ state->w[i - 16];
-	}
-	a = state->h[0];
-	b = state->h[1];
-	c = state->h[2];
-	d = state->h[3];
-	e = state->h[4];
-	for (i = 0; i < 20;) {
-		G0(a, b, c, d, e, i++);
-		G0(e, a, b, c, d, i++);
-		G0(d, e, a, b, c, i++);
-		G0(c, d, e, a, b, i++);
-		G0(b, c, d, e, a, i++);
-	}
-	while (i < 40) {
-		G1(a, b, c, d, e, i++);
-		G1(e, a, b, c, d, i++);
-		G1(d, e, a, b, c, i++);
-		G1(c, d, e, a, b, i++);
-		G1(b, c, d, e, a, i++);
-	}
-	while (i < 60) {
-		G2(a, b, c, d, e, i++);
-		G2(e, a, b, c, d, i++);
-		G2(d, e, a, b, c, i++);
-		G2(c, d, e, a, b, i++);
-		G2(b, c, d, e, a, i++);
-	}
-	while (i < 80) {
-		G3(a, b, c, d, e, i++);
-		G3(e, a, b, c, d, i++);
-		G3(d, e, a, b, c, i++);
-		G3(c, d, e, a, b, i++);
-		G3(b, c, d, e, a, i++);
-	}
-	state->h[0] = TRUNC32(state->h[0] + a);
-	state->h[1] = TRUNC32(state->h[1] + b);
-	state->h[2] = TRUNC32(state->h[2] + c);
-	state->h[3] = TRUNC32(state->h[3] + d);
-	state->h[4] = TRUNC32(state->h[4] + e);
+
+	return off;
 
 #undef F0
 #undef F1
@@ -86,4 +102,176 @@ libsha1_process(struct libsha1_state *restrict state, const unsigned char *restr
 #undef G1
 #undef G2
 #undef G3
+}
+
+#ifdef HAVE_X86_SHA_INTRINSICS
+
+static size_t
+process_x86_sha(struct libsha1_state *restrict state, const unsigned char *restrict data, size_t len)
+{
+	const __m128i SHUFFLE_MASK = _mm_set_epi64x(0x0001020304050607ULL, 0x08090A0B0C0D0E0FULL);
+	register __m128i abcd, e000, temp, w[4];
+	__m128i abcd_orig, e000_orig;
+	size_t off = 0;
+
+	abcd_orig = _mm_shuffle_epi32(_mm_loadu_si128((const __m128i *)&state->h[0]), 32 - 5);
+	e000_orig = _mm_set_epi32(state->h[4], 0, 0, 0);
+
+	for (; len >= off + sizeof(state->chunk); off += sizeof(state->chunk)) {
+		w[0] = _mm_loadu_si128((const __m128i *)&data[0]);
+		w[0] = _mm_shuffle_epi8(w[0], SHUFFLE_MASK);
+		e000 = _mm_add_epi32(e000_orig, w[0]);
+		temp = abcd_orig;
+		abcd = _mm_sha1rnds4_epu32(abcd_orig, e000, 0);
+
+		w[1] = _mm_loadu_si128((const __m128i *)&data[16]);
+		w[1] = _mm_shuffle_epi8(w[1], SHUFFLE_MASK);
+		temp = _mm_sha1nexte_epu32(temp, w[1]);
+		e000 = abcd;
+		abcd = _mm_sha1rnds4_epu32(abcd, temp, 0);
+		w[0] = _mm_sha1msg1_epu32(w[0], w[1]);
+
+		w[2] = _mm_loadu_si128((const __m128i *)&data[32]);
+		w[2] = _mm_shuffle_epi8(w[2], SHUFFLE_MASK);
+		e000 = _mm_sha1nexte_epu32(e000, w[2]);
+		temp = abcd;
+		abcd = _mm_sha1rnds4_epu32(abcd, e000, 0);
+		w[1] = _mm_sha1msg1_epu32(w[1], w[2]);
+		w[0] = _mm_xor_si128(w[0], w[2]);
+
+		w[3] = _mm_loadu_si128((const __m128i *)&data[48]);
+		w[3] = _mm_shuffle_epi8(w[3], SHUFFLE_MASK);
+		temp = _mm_sha1nexte_epu32(temp, w[3]);
+		e000 = abcd;
+		w[0] = _mm_sha1msg2_epu32(w[0], w[3]);
+		abcd = _mm_sha1rnds4_epu32(abcd, temp, 0);
+		w[2] = _mm_sha1msg1_epu32(w[2], w[3]);
+		w[1] = _mm_xor_si128(w[1], w[3]);
+
+		e000 = _mm_sha1nexte_epu32(e000, w[0]);
+		temp = abcd;
+		w[1] = _mm_sha1msg2_epu32(w[1], w[0]);
+		abcd = _mm_sha1rnds4_epu32(abcd, e000, 0);
+		w[3] = _mm_sha1msg1_epu32(w[3], w[0]);
+		w[2] = _mm_xor_si128(w[2], w[0]);
+
+		temp = _mm_sha1nexte_epu32(temp, w[1]);
+		e000 = abcd;
+		w[2] = _mm_sha1msg2_epu32(w[2], w[1]);
+		abcd = _mm_sha1rnds4_epu32(abcd, temp, 1);
+		w[0] = _mm_sha1msg1_epu32(w[0], w[1]);
+		w[3] = _mm_xor_si128(w[3], w[1]);
+
+		e000 = _mm_sha1nexte_epu32(e000, w[2]);
+		temp = abcd;
+		w[3] = _mm_sha1msg2_epu32(w[3], w[2]);
+		abcd = _mm_sha1rnds4_epu32(abcd, e000, 1);
+		w[1] = _mm_sha1msg1_epu32(w[1], w[2]);
+		w[0] = _mm_xor_si128(w[0], w[2]);
+
+		temp = _mm_sha1nexte_epu32(temp, w[3]);
+		e000 = abcd;
+		w[0] = _mm_sha1msg2_epu32(w[0], w[3]);
+		abcd = _mm_sha1rnds4_epu32(abcd, temp, 1);
+		w[2] = _mm_sha1msg1_epu32(w[2], w[3]);
+		w[1] = _mm_xor_si128(w[1], w[3]);
+
+		e000 = _mm_sha1nexte_epu32(e000, w[0]);
+		temp = abcd;
+		w[1] = _mm_sha1msg2_epu32(w[1], w[0]);
+		abcd = _mm_sha1rnds4_epu32(abcd, e000, 1);
+		w[3] = _mm_sha1msg1_epu32(w[3], w[0]);
+		w[2] = _mm_xor_si128(w[2], w[0]);
+
+		temp = _mm_sha1nexte_epu32(temp, w[1]);
+		e000 = abcd;
+		w[2] = _mm_sha1msg2_epu32(w[2], w[1]);
+		abcd = _mm_sha1rnds4_epu32(abcd, temp, 1);
+		w[0] = _mm_sha1msg1_epu32(w[0], w[1]);
+		w[3] = _mm_xor_si128(w[3], w[1]);
+
+		e000 = _mm_sha1nexte_epu32(e000, w[2]);
+		temp = abcd;
+		w[3] = _mm_sha1msg2_epu32(w[3], w[2]);
+		abcd = _mm_sha1rnds4_epu32(abcd, e000, 2);
+		w[1] = _mm_sha1msg1_epu32(w[1], w[2]);
+		w[0] = _mm_xor_si128(w[0], w[2]);
+
+		temp = _mm_sha1nexte_epu32(temp, w[3]);
+		e000 = abcd;
+		w[0] = _mm_sha1msg2_epu32(w[0], w[3]);
+		abcd = _mm_sha1rnds4_epu32(abcd, temp, 2);
+		w[2] = _mm_sha1msg1_epu32(w[2], w[3]);
+		w[1] = _mm_xor_si128(w[1], w[3]);
+
+		e000 = _mm_sha1nexte_epu32(e000, w[0]);
+		temp = abcd;
+		w[1] = _mm_sha1msg2_epu32(w[1], w[0]);
+		abcd = _mm_sha1rnds4_epu32(abcd, e000, 2);
+		w[3] = _mm_sha1msg1_epu32(w[3], w[0]);
+		w[2] = _mm_xor_si128(w[2], w[0]);
+
+		temp = _mm_sha1nexte_epu32(temp, w[1]);
+		e000 = abcd;
+		w[2] = _mm_sha1msg2_epu32(w[2], w[1]);
+		abcd = _mm_sha1rnds4_epu32(abcd, temp, 2);
+		w[0] = _mm_sha1msg1_epu32(w[0], w[1]);
+		w[3] = _mm_xor_si128(w[3], w[1]);
+
+		e000 = _mm_sha1nexte_epu32(e000, w[2]);
+		temp = abcd;
+		w[3] = _mm_sha1msg2_epu32(w[3], w[2]);
+		abcd = _mm_sha1rnds4_epu32(abcd, e000, 2);
+		w[1] = _mm_sha1msg1_epu32(w[1], w[2]);
+		w[0] = _mm_xor_si128(w[0], w[2]);
+
+		temp = _mm_sha1nexte_epu32(temp, w[3]);
+		e000 = abcd;
+		w[0] = _mm_sha1msg2_epu32(w[0], w[3]);
+		abcd = _mm_sha1rnds4_epu32(abcd, temp, 3);
+		w[2] = _mm_sha1msg1_epu32(w[2], w[3]);
+		w[1] = _mm_xor_si128(w[1], w[3]);
+
+		e000 = _mm_sha1nexte_epu32(e000, w[0]);
+		temp = abcd;
+		w[1] = _mm_sha1msg2_epu32(w[1], w[0]);
+		abcd = _mm_sha1rnds4_epu32(abcd, e000, 3);
+		w[3] = _mm_sha1msg1_epu32(w[3], w[0]);
+		w[2] = _mm_xor_si128(w[2], w[0]);
+
+		temp = _mm_sha1nexte_epu32(temp, w[1]);
+		e000 = abcd;
+		w[2] = _mm_sha1msg2_epu32(w[2], w[1]);
+		abcd = _mm_sha1rnds4_epu32(abcd, temp, 3);
+		w[3] = _mm_xor_si128(w[3], w[1]);
+
+		e000 = _mm_sha1nexte_epu32(e000, w[2]);
+		temp = abcd;
+		w[3] = _mm_sha1msg2_epu32(w[3], w[2]);
+		abcd = _mm_sha1rnds4_epu32(abcd, e000, 3);
+
+		temp = _mm_sha1nexte_epu32(temp, w[3]);
+		e000 = abcd;
+		abcd = _mm_sha1rnds4_epu32(abcd, temp, 3);
+
+		e000_orig = _mm_sha1nexte_epu32(e000, e000_orig);
+		abcd_orig = _mm_add_epi32(abcd, abcd_orig);
+	}
+
+	_mm_storeu_si128((__m128i *)&state->h[0], _mm_shuffle_epi32(abcd_orig, 32 - 5));
+	state->h[4] = _mm_extract_epi32(e000_orig, 3);
+
+	return off;
+}
+
+#endif
+
+size_t
+libsha1_process(struct libsha1_state *restrict state, const unsigned char *restrict data, size_t len)
+{
+#ifdef HAVE_X86_SHA_INTRINSICS
+	if (state->algorithm == LIBSHA1_1)
+		return process_x86_sha(state, data, len);
+#endif
+	return process_portable(state, data, len);
 }

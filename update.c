@@ -5,7 +5,7 @@
 void
 libsha1_update(struct libsha1_state *restrict state, const void *restrict message_, size_t msglen)
 {
-	const char *restrict message = message_;
+	const unsigned char *restrict message = message_;
 	size_t n, off;
 
 	off = (state->message_size / 8) % sizeof(state->chunk);
@@ -16,17 +16,13 @@ libsha1_update(struct libsha1_state *restrict state, const void *restrict messag
 		n = msglen < sizeof(state->chunk) - off ? msglen : sizeof(state->chunk) - off;
 		memcpy(&state->chunk[off], message, n);
 		if (off + n == sizeof(state->chunk))
-			libsha1_process(state, state->chunk);
+			libsha1_process(state, state->chunk, sizeof(state->chunk));
 		message += n;
 		msglen -= n;
 	}
 
-	while (msglen >= sizeof(state->chunk)) {
-		libsha1_process(state, (const unsigned char *)message);
-		message += sizeof(state->chunk);
-		msglen -= sizeof(state->chunk);
-	}
+	off = libsha1_process(state, message, msglen);
 
-	if (msglen)
-		memcpy(state->chunk, message, msglen);
+	if (msglen > off)
+		memcpy(state->chunk, &message[off], msglen - off);
 }

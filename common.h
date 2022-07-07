@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <alloca.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
@@ -13,6 +14,15 @@
 #ifndef ALLOCA_LIMIT
 # define ALLOCA_LIMIT 0
 #endif
+
+
+/**
+ * Truncate an unsigned integer to an unsigned 32-bit integer
+ * 
+ * @param   X:uint_least32_t  The value to truncate
+ * @return  :uint_least32_t   The 32 lowest bits in `X`
+ */
+#define TRUNC32(X) ((X) & (uint_least32_t)0xFFFFFFFFUL)
 
 
 /**

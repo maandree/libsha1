@@ -5,7 +5,7 @@
 /**
  * Initial state for SHA-1 and SHA-0
  */
-static const uint32_t H[] = {
+static const uint_least32_t H[] = {
 	0x67452301UL, 0xEFCDAB89UL, 0x98BADCFEUL, 0x10325476UL, 0xC3D2E1F0UL
 };
 

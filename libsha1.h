@@ -44,12 +44,12 @@ struct libsha1_state {
 	 * 
 	 * Does not need to be marshalled
 	 */
-	uint32_t w[80];
+	uint_least32_t w[80];
 
 	/**
 	 * Hashing values
 	 */
-	uint32_t h[5];
+	uint_least32_t h[5];
 
 	/**
 	 * Space for chunks to process

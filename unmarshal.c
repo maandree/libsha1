@@ -7,13 +7,15 @@ libsha1_unmarshal(struct libsha1_state *restrict state, const void *restrict buf
 {
 	const char *restrict buf = buf_;
 	size_t off = 0;
+	int version;
 
 	if (bufsize < sizeof(int) + sizeof(enum libsha1_algorithm) + sizeof(size_t)) {
 		errno = EINVAL;
 		return 0;
 	}
 
-	if (*(const int *)buf) { /* version */
+	version = *(const int *)buf;
+	if (version < 0 || version > 1) { /* version */
 		errno = EINVAL;
 		return 0;
 	}
@@ -28,8 +30,9 @@ libsha1_unmarshal(struct libsha1_state *restrict state, const void *restrict buf
 		errno = EINVAL;
 		return 0;
 	}
-	memcpy(state->w, &buf[off], sizeof(state->w));
-	off += sizeof(state->w);
+	memset(state->w, 0, sizeof(state->w));
+	if (version == 0)
+		off += sizeof(state->w);
 	memcpy(state->h, &buf[off], sizeof(state->h));
 	off += sizeof(state->h);
 

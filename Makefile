@@ -119,7 +119,7 @@ uninstall:
 	-cd -- "$(DESTDIR)$(MANPREFIX)/man7" && rm -f -- $(MAN7)
 
 clean:
-	-rm -f -- *.o *.lo *.su *.a *.so *.gcda *.gcno *.gcov test
+	-rm -f -- *.o *.lo *.su *.a *.$(LIBEXT) *.gcda *.gcno *.gcov test
 
 .SUFFIXES:
 .SUFFIXES: .lo .o .c

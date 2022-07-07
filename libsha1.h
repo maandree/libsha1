@@ -10,6 +10,7 @@
  * Algorithms supported by libsha1
  */
 enum libsha1_algorithm {
+
 	/**
 	 * SHA-0, outputs 20 bytes
 	 */
@@ -31,6 +32,7 @@ enum libsha1_algorithm {
  * `explicit_bzero` (or `memset`) when you are done.
  */
 struct libsha1_state {
+
 	/**
 	 * The size of the message, as far as processed, in bits;
 	 */
@@ -72,6 +74,7 @@ struct libsha1_state {
  * `explicit_bzero` (or `memset`) when you are done.
  */
 struct libsha1_hmac_state {
+
 	/**
 	 * State of the underlaying hash function
 	 */

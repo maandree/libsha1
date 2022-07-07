@@ -8,8 +8,4 @@
  * @param   state  The state
  * @return         The number of bytes in the output, zero on error
  */
-size_t
-libsha1_state_output_size(const struct libsha1_state *restrict state)
-{
-	return libsha1_algorithm_output_size(state->algorithm);
-}
+extern inline size_t libsha1_state_output_size(const struct libsha1_state *restrict state);

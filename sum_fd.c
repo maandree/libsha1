@@ -52,7 +52,7 @@ libsha1_sum_fd(int fd, enum libsha1_algorithm algorithm, void *restrict hashsum)
 			if (errno == EINTR)
 				continue;
 #if ALLOCA_LIMIT <= 0
-	free(chunk);
+			free(chunk);
 #endif
 			return -1;
 		}

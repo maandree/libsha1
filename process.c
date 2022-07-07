@@ -260,8 +260,9 @@ process_x86_sha(struct libsha1_state *restrict state, const unsigned char *restr
 		abcd_orig = _mm_add_epi32(abcd, abcd_orig);
 	}
 
-	_mm_storeu_si128((__m128i *)&state->h[0], _mm_shuffle_epi32(abcd_orig, 32 - 5));
+	abcd_orig = _mm_shuffle_epi32(abcd_orig, 32 - 5);
 	state->h[4] = (uint_least32_t)_mm_extract_epi32(e000_orig, 3);
+	_mm_storeu_si128((__m128i *)&state->h[0], abcd_orig);
 
 	return off;
 }

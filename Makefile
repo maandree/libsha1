@@ -61,6 +61,9 @@ MAN3 =\
 	libsha1_unmarshal.3\
 	libsha1_update.3
 
+MAN7 =\
+	libsha1.7
+
 LOBJ = $(OBJ:.o=.lo)
 
 
@@ -93,6 +96,7 @@ install: libsha1.a libsha1.$(LIBEXT)
 	mkdir -p -- "$(DESTDIR)$(PREFIX)/include"
 	mkdir -p -- "$(DESTDIR)$(MANPREFIX)/man0"
 	mkdir -p -- "$(DESTDIR)$(MANPREFIX)/man3"
+	mkdir -p -- "$(DESTDIR)$(MANPREFIX)/man7"
 	cp -- libsha1.a "$(DESTDIR)$(PREFIX)/lib"
 	cp -- libsha1.$(LIBEXT) "$(DESTDIR)$(PREFIX)/lib/libsha1.$(LIBMINOREXT)"
 	$(FIX_INSTALL_NAME) "$(DESTDIR)$(PREFIX)/lib/libsha1.$(LIBMINOREXT)"
@@ -101,6 +105,7 @@ install: libsha1.a libsha1.$(LIBEXT)
 	cp -- libsha1.h "$(DESTDIR)$(PREFIX)/include"
 	cp -- $(MAN0) "$(DESTDIR)$(MANPREFIX)/man0"
 	cp -- $(MAN3) "$(DESTDIR)$(MANPREFIX)/man3"
+	cp -- $(MAN7) "$(DESTDIR)$(MANPREFIX)/man7"
 
 uninstall:
 	-rm -f -- "$(DESTDIR)$(PREFIX)/lib/libsha1.a"
@@ -110,6 +115,7 @@ uninstall:
 	-rm -f -- "$(DESTDIR)$(PREFIX)/include/libsha1.h"
 	-cd -- "$(DESTDIR)$(MANPREFIX)/man0" && rm -f -- $(MAN0)
 	-cd -- "$(DESTDIR)$(MANPREFIX)/man3" && rm -f -- $(MAN3)
+	-cd -- "$(DESTDIR)$(MANPREFIX)/man7" && rm -f -- $(MAN7)
 
 clean:
 	-rm -f -- *.o *.lo *.su *.a *.so test

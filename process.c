@@ -1,5 +1,6 @@
 /* See LICENSE file for copyright and license details. */
 #include "common.h"
+#include <stdatomic.h>
 
 #if defined(__SSE4_1__) && defined(__SSSE3__) && defined(__SSE2__) && defined(__SHA__)
 # define HAVE_X86_SHA_INTRINSICS
@@ -260,11 +261,46 @@ process_x86_sha(struct libsha1_state *restrict state, const unsigned char *restr
 		abcd_orig = _mm_add_epi32(abcd, abcd_orig);
 	}
 
-	abcd_orig = _mm_shuffle_epi32(abcd_orig, 32 - 5);
+	_mm_storeu_si128((__m128i *)&state->h[0], _mm_shuffle_epi32(abcd_orig, 32 - 5));
 	state->h[4] = (uint_least32_t)_mm_extract_epi32(e000_orig, 3);
-	_mm_storeu_si128((__m128i *)&state->h[0], abcd_orig);
 
 	return off;
+}
+
+# if defined(__GNUC__)
+__attribute__((__constructor__))
+# endif
+static int
+have_sha_intrinsics(void)
+{
+        static volatile int ret = -1;
+        static volatile atomic_flag spinlock = ATOMIC_FLAG_INIT;
+
+	if (ret != -1)
+		return ret;
+
+        while (atomic_flag_test_and_set(&spinlock));
+
+	if (ret != -1)
+		goto out;
+
+	int a = 7, b, c = 0, d;
+	__asm__ volatile("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "a"(a), "c"(c));
+	if (!(b & (1 << 29))) {
+		ret = 0;
+		goto out;
+	}
+	a = 1;
+	__asm__ volatile("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "a"(a), "c"(c));
+	if (!(c & (1 << 19)) || !(c & (1 << 0)) || !(d & (1 << 26))) {
+		ret = 0;
+		goto out;
+	}
+	ret = 1;
+
+out:
+	atomic_flag_clear(&spinlock);
+	return ret;
 }
 
 #endif
@@ -273,7 +309,7 @@ size_t
 libsha1_process(struct libsha1_state *restrict state, const unsigned char *restrict data, size_t len)
 {
 #ifdef HAVE_X86_SHA_INTRINSICS
-	if (state->algorithm == LIBSHA1_1)
+	if (state->algorithm == LIBSHA1_1 && have_sha_intrinsics())
 		return process_x86_sha(state, data, len);
 #endif
 	return process_portable(state, data, len);

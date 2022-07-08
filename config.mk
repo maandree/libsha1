@@ -1,7 +1,7 @@
 PREFIX    = /usr
 MANPREFIX = $(PREFIX)/share/man
 
-CC = c99
+CC = c11
 
 CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_XOPEN_SOURCE=700
 CFLAGS   = -Wall -O3 -msse4 -msha

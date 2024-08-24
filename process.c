@@ -275,6 +275,7 @@ have_sha_intrinsics(void)
 {
         static volatile int ret = -1;
         static volatile atomic_flag spinlock = ATOMIC_FLAG_INIT;
+	int a, b, c, d;
 
 	if (ret != -1)
 		return ret;
@@ -284,7 +285,8 @@ have_sha_intrinsics(void)
 	if (ret != -1)
 		goto out;
 
-	int a = 7, b, c = 0, d;
+	a = 7;
+	c = 0;
 	__asm__ volatile("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) : "a"(a), "c"(c));
 	if (!(b & (1 << 29))) {
 		ret = 0;

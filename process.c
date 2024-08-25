@@ -120,7 +120,7 @@ process_x86_sha(struct libsha1_state *restrict state, const unsigned char *restr
 	abcd_orig = _mm_shuffle_epi32(_mm_loadu_si128((const __m128i *)&state->h[0]), 32 - 5);
 	e000_orig = _mm_set_epi32((int)state->h[4], 0, 0, 0);
 
-	for (; len >= off + sizeof(state->chunk); off += sizeof(state->chunk)) {
+	for (; len >= off + sizeof(state->chunk); off += sizeof(state->chunk), data = &data[sizeof(state->chunk)]) {
 		msg0 = _mm_loadu_si128((const __m128i *)&data[0]);
 		msg0 = _mm_shuffle_epi8(msg0, SHUFFLE_MASK);
 		e000 = _mm_add_epi32(e000_orig, msg0);

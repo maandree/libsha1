@@ -85,7 +85,7 @@
 int
 main(int argc, char *argv[])
 {
-	char buf[8096], str[2048];
+	char buf[8192 * 32], str[2048];
 	struct libsha1_state s;
 	struct libsha1_hmac_state hs;
 	int skip_huge, fds[2], status;

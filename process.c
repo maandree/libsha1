@@ -6,9 +6,20 @@
 # define HAVE_X86_SHA_INTRINSICS
 #endif
 
+#if defined(__arm__) || defined(__aarch32__) || defined(__arm64__) || defined(__aarch64__) || defined(_M_ARM)
+# if defined(__ARM_NEON) && (defined(__ARM_ACLE) || defined(__ARM_FEATURE_CRYPTO))
+#  define HAVE_ARM_SHA_INTRINSICS
+# endif
+#endif
+
 
 #ifdef HAVE_X86_SHA_INTRINSICS
 # include <immintrin.h>
+#endif
+
+#ifdef HAVE_ARM_SHA_INTRINSICS
+# include <arm_neon.h>
+# include <arm_acle.h>
 #endif
 
 
@@ -309,12 +320,171 @@ out:
 
 #endif
 
+#ifdef HAVE_ARM_SHA_INTRINSICS
+
+static size_t
+process_arm_sha(struct libsha1_state *restrict state, const unsigned char *restrict data, size_t len)
+{
+	uint32x4_t abcd, tmp0, tmp1, msg0, msg1, msg2, msg3;
+	uint32x4_t abcd_orig, rc0, rc1, rc2, rc3;
+	uint32_t e0, e1, e_orig;
+	size_t off = 0;
+
+	abcd_orig = vld1q_u32(&state->h[0]);
+	e_orig = state->h[4];
+
+	rc0 = vdupq_n_u32(UINT32_C(0x5A827999));
+	rc1 = vdupq_n_u32(UINT32_C(0x6ED9EBA1));
+	rc2 = vdupq_n_u32(UINT32_C(0x8F1BBCDC));
+	rc3 = vdupq_n_u32(UINT32_C(0xCA62C1D6));
+
+	for (; len >= off + sizeof(state->chunk); off += sizeof(state->chunk), data = &data[sizeof(state->chunk)]) {
+		msg0 = vld1q_u32((const uint32_t *)&data[0]);
+		msg1 = vld1q_u32((const uint32_t *)&data[16]);
+		msg2 = vld1q_u32((const uint32_t *)&data[32]);
+		msg3 = vld1q_u32((const uint32_t *)&data[48]);
+		msg0 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(msg0)));
+		msg1 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(msg1)));
+		msg2 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(msg2)));
+		msg3 = vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(msg3)));
+
+		tmp0 = vaddq_u32(msg0, rc0);
+		tmp1 = vaddq_u32(msg1, rc0);
+
+		e1 = vsha1h_u32(vgetq_lane_u32(abcd_orig, 0));
+		abcd = vsha1cq_u32(abcd_orig, e_orig, tmp0);
+		tmp0 = vaddq_u32(msg2, rc0);
+		msg0 = vsha1su0q_u32(msg0, msg1, msg2);
+
+		e0 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1cq_u32(abcd, e1, tmp1);
+		tmp1 = vaddq_u32(msg3, rc0);
+		msg0 = vsha1su1q_u32(msg0, msg3);
+		msg1 = vsha1su0q_u32(msg1, msg2, msg3);
+
+		e1 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1cq_u32(abcd, e0, tmp0);
+		tmp0 = vaddq_u32(msg0, rc0);
+		msg1 = vsha1su1q_u32(msg1, msg0);
+		msg2 = vsha1su0q_u32(msg2, msg3, msg0);
+
+		e0 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1cq_u32(abcd, e1, tmp1);
+		tmp1 = vaddq_u32(msg1, rc1);
+		msg2 = vsha1su1q_u32(msg2, msg1);
+		msg3 = vsha1su0q_u32(msg3, msg0, msg1);
+
+		e1 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1cq_u32(abcd, e0, tmp0);
+		tmp0 = vaddq_u32(msg2, rc1);
+		msg3 = vsha1su1q_u32(msg3, msg2);
+		msg0 = vsha1su0q_u32(msg0, msg1, msg2);
+
+		e0 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1pq_u32(abcd, e1, tmp1);
+		tmp1 = vaddq_u32(msg3, rc1);
+		msg0 = vsha1su1q_u32(msg0, msg3);
+		msg1 = vsha1su0q_u32(msg1, msg2, msg3);
+
+		e1 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1pq_u32(abcd, e0, tmp0);
+		tmp0 = vaddq_u32(msg0, rc1);
+		msg1 = vsha1su1q_u32(msg1, msg0);
+		msg2 = vsha1su0q_u32(msg2, msg3, msg0);
+
+		e0 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1pq_u32(abcd, e1, tmp1);
+		tmp1 = vaddq_u32(msg1, rc1);
+		msg2 = vsha1su1q_u32(msg2, msg1);
+		msg3 = vsha1su0q_u32(msg3, msg0, msg1);
+
+		e1 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1pq_u32(abcd, e0, tmp0);
+		tmp0 = vaddq_u32(msg2, rc2);
+		msg3 = vsha1su1q_u32(msg3, msg2);
+		msg0 = vsha1su0q_u32(msg0, msg1, msg2);
+
+		e0 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1pq_u32(abcd, e1, tmp1);
+		tmp1 = vaddq_u32(msg3, rc2);
+		msg0 = vsha1su1q_u32(msg0, msg3);
+		msg1 = vsha1su0q_u32(msg1, msg2, msg3);
+
+		e1 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1mq_u32(abcd, e0, tmp0);
+		tmp0 = vaddq_u32(msg0, rc2);
+		msg1 = vsha1su1q_u32(msg1, msg0);
+		msg2 = vsha1su0q_u32(msg2, msg3, msg0);
+
+		e0 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1mq_u32(abcd, e1, tmp1);
+		tmp1 = vaddq_u32(msg1, rc2);
+		msg2 = vsha1su1q_u32(msg2, msg1);
+		msg3 = vsha1su0q_u32(msg3, msg0, msg1);
+
+		e1 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1mq_u32(abcd, e0, tmp0);
+		tmp0 = vaddq_u32(msg2, rc2);
+		msg3 = vsha1su1q_u32(msg3, msg2);
+		msg0 = vsha1su0q_u32(msg0, msg1, msg2);
+
+		e0 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1mq_u32(abcd, e1, tmp1);
+		tmp1 = vaddq_u32(msg3, rc3);
+		msg0 = vsha1su1q_u32(msg0, msg3);
+		msg1 = vsha1su0q_u32(msg1, msg2, msg3);
+
+		e1 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1mq_u32(abcd, e0, tmp0);
+		tmp0 = vaddq_u32(msg0, rc3);
+		msg1 = vsha1su1q_u32(msg1, msg0);
+		msg2 = vsha1su0q_u32(msg2, msg3, msg0);
+
+		e0 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1pq_u32(abcd, e1, tmp1);
+		tmp1 = vaddq_u32(msg1, rc3);
+		msg2 = vsha1su1q_u32(msg2, msg1);
+		msg3 = vsha1su0q_u32(msg3, msg0, msg1);
+
+		e1 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1pq_u32(abcd, e0, tmp0);
+		tmp0 = vaddq_u32(msg2, rc3);
+		msg3 = vsha1su1q_u32(msg3, msg2);
+		msg0 = vsha1su0q_u32(msg0, msg1, msg2);
+
+		e0 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1pq_u32(abcd, e1, tmp1);
+		tmp1 = vaddq_u32(msg3, rc3);
+		msg0 = vsha1su1q_u32(msg0, msg3);
+
+		e1 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1pq_u32(abcd, e0, tmp0);
+
+		e0 = vsha1h_u32(vgetq_lane_u32(abcd, 0));
+		abcd = vsha1pq_u32(abcd, e1, tmp1);
+
+		e_orig += e0;
+		abcd_orig = vaddq_u32(abcd_orig, abcd);
+	}
+
+	vst1q_u32(&state->h[0], abcd_orig);
+	state->h[4] = e_orig;
+
+	return off;
+}
+
+#endif
+
 size_t
 libsha1_process(struct libsha1_state *restrict state, const unsigned char *restrict data, size_t len)
 {
 #ifdef HAVE_X86_SHA_INTRINSICS
 	if (state->algorithm == LIBSHA1_1 && have_sha_intrinsics())
 		return process_x86_sha(state, data, len);
+#endif
+#ifdef HAVE_ARM_SHA_INTRINSICS
+	if (state->algorithm == LIBSHA1_1)
+		return process_arm_sha(state, data, len);
 #endif
 	return process_portable(state, data, len);
 }

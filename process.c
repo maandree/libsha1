@@ -45,8 +45,10 @@ process_portable(struct libsha1_state *restrict state, const unsigned char *rest
 			state->w[i] |= (uint_least32_t)chunk[4 * i + 3];
 		}
 		if (state->algorithm == LIBSHA1_1) {
-			for (; i < 80; i++)
-				state->w[i] = rorl(state->w[i - 3] ^ state->w[i - 8] ^ state->w[i - 14] ^ state->w[i - 16], 1);
+			for (; i < 80; i++) {
+				state->w[i] = state->w[i - 3] ^ state->w[i - 8] ^ state->w[i - 14] ^ state->w[i - 16];
+				state->w[i] = rorl(state->w[i], 1);
+			}
 		} else {
 			for (; i < 80; i++)
 				state->w[i] = state->w[i - 3] ^ state->w[i - 8] ^ state->w[i - 14] ^ state->w[i - 16];
@@ -117,7 +119,7 @@ process_x86_sha(struct libsha1_state *restrict state, const unsigned char *restr
 	__m128i abcd_orig, e000_orig;
 	size_t off = 0;
 
-	abcd_orig = _mm_shuffle_epi32(_mm_loadu_si128((const __m128i *)&state->h[0]), 32 - 5);
+	abcd_orig = _mm_shuffle_epi32(_mm_loadu_si128((const __m128i *)&state->h[0]), 033 /* 0b00'01'10'11 */);
 	e000_orig = _mm_set_epi32((int)state->h[4], 0, 0, 0);
 
 	for (; len >= off + sizeof(state->chunk); off += sizeof(state->chunk), data = &data[sizeof(state->chunk)]) {
@@ -261,7 +263,7 @@ process_x86_sha(struct libsha1_state *restrict state, const unsigned char *restr
 		abcd_orig = _mm_add_epi32(abcd, abcd_orig);
 	}
 
-	_mm_storeu_si128((__m128i *)&state->h[0], _mm_shuffle_epi32(abcd_orig, 32 - 5));
+	_mm_storeu_si128((__m128i *)&state->h[0], _mm_shuffle_epi32(abcd_orig, 033));
 	state->h[4] = (uint_least32_t)_mm_extract_epi32(e000_orig, 3);
 
 	return off;

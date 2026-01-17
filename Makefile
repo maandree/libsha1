@@ -7,7 +7,7 @@ CONFIGFILE = config-x86.mk
 # enables optimisations on x86 CPU's that have the
 # required features.
 # 
-# Additionally config-arm.mk which uses optimisations
+# Additionally config-armv8.mk which uses optimisations
 # for ARMv8 is available.
 # 
 # config-portable.mk is available for exotic CPU's

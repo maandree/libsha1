@@ -1,4 +1,4 @@
-.TH LIBSHA1_HMAC_DIGEST 3 2019-02-10 libsha1
+.TH LIBSHA1_HMAC_DIGEST 3 LIBSHA1
 .SH NAME
 libsha1_hmac_digest \- Get the result of a HMAC-SHA 1/0 hashing
 .SH SYNOPSIS
@@ -31,11 +31,11 @@ least the return value of the
 .BR libsha1_hmac_state_output_size (3)
 function.
 .PP
-If 
+If
 .I msglen
 is not a multiple of 8, the lowest
 .I msglen%8
-bits from the last by in
+bits from the last byte in
 .I message
 is used as the complete byte.
 .PP
@@ -66,5 +66,4 @@ None.
 .BR libsha1_behex_upper (3),
 .BR libsha1_hmac_init (3),
 .BR libsha1_hmac_state_output_size (3),
-.BR libsha1_hmac_sum_fd (3),
 .BR libsha1_hmac_update (3)

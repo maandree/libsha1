@@ -1,4 +1,4 @@
-.TH LIBSHA1.H 0 2019-02-10 libsha1
+.TH LIBSHA1.H 0 LIBSHA1
 .SH NAME
 libsha1.h \- SHA-1 and SHA-0 library header
 .SH SYNOPSIS

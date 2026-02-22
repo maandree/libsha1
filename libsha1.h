@@ -77,12 +77,12 @@ struct libsha1_state {
 struct libsha1_hmac_state {
 
 	/**
-	 * State of the underlaying hash function
+	 * State of the underlying hash function
 	 */
 	struct libsha1_state sha1_state;
 
 	/**
-	 * The output size of the underlaying
+	 * The output size of the underlying
 	 * hash algorithm, in bits
 	 */
 	size_t outsize;
@@ -310,7 +310,7 @@ void libsha1_hmac_update(struct libsha1_hmac_state *restrict, const void *restri
  * @param  data    Data to feed into the algorithm
  * @param  n       The number of bytes to feed into the algorithm
  * @param  output  The output buffer for the hash, it will be as
- *                 large as for the underlaying hash algorithm
+ *                 large as for the underlying hash algorithm
  */
 #if defined(__GNUC__)
 __attribute__((__leaf__, __nonnull__, __nothrow__))

@@ -18,6 +18,8 @@
 #endif
 
 #ifdef HAVE_ARM_SHA_INTRINSICS
+# include <asm/hwcap.h>
+# include <sys/auxv.h>
 # include <arm_neon.h>
 # include <arm_acle.h>
 #endif
@@ -473,6 +475,33 @@ process_arm_sha(struct libsha1_state *restrict state, const unsigned char *restr
 	return off;
 }
 
+# if defined(__GNUC__)
+__attribute__((__constructor__))
+# endif
+static int
+have_sha_intrinsics(void)
+{
+	static volatile int ret = -1;
+	static volatile atomic_flag spinlock = ATOMIC_FLAG_INIT;
+
+	if (ret != -1)
+		return ret;
+
+	while (atomic_flag_test_and_set(&spinlock));
+
+	if (ret != -1)
+		goto out;
+
+	if (getauxval(AT_HWCAP) & HWCAP_SHA1)
+		ret = 1;
+	else
+		ret = 0;
+
+out:
+	atomic_flag_clear(&spinlock);
+	return ret;
+}
+
 #endif
 
 size_t
@@ -483,7 +512,7 @@ libsha1_process(struct libsha1_state *restrict state, const unsigned char *restr
 		return process_x86_sha(state, data, len);
 #endif
 #ifdef HAVE_ARM_SHA_INTRINSICS
-	if (state->algorithm == LIBSHA1_1)
+	if (state->algorithm == LIBSHA1_1 && have_sha_intrinsics())
 		return process_arm_sha(state, data, len);
 #endif
 	return process_portable(state, data, len);

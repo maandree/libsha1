@@ -1,5 +1,6 @@
 /* See LICENSE file for copyright and license details. */
 #include "common.h"
+#include <errno.h>
 #include <stdatomic.h>
 
 #if defined(__SSE4_1__) && defined(__SSSE3__) && defined(__SSE2__) && defined(__SHA__)
@@ -483,6 +484,7 @@ have_sha_intrinsics(void)
 {
 	static volatile int ret = -1;
 	static volatile atomic_flag spinlock = ATOMIC_FLAG_INIT;
+	int saved_errno;
 
 	if (ret != -1)
 		return ret;
@@ -492,10 +494,12 @@ have_sha_intrinsics(void)
 	if (ret != -1)
 		goto out;
 
+	saved_errno = errno;
 	if (getauxval(AT_HWCAP) & HWCAP_SHA1)
 		ret = 1;
 	else
 		ret = 0;
+	errno = saved_errno;
 
 out:
 	atomic_flag_clear(&spinlock);

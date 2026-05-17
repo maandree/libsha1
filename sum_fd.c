@@ -18,15 +18,15 @@ libsha1_sum_fd(int fd, enum libsha1_algorithm algorithm, void *restrict hashsum)
 
 #ifndef _WIN32
 	if (fstat(fd, &attr) == 0 && attr.st_blksize > 0)
-		blksize = (size_t)(attr.st_blksize);
+		blksize = (size_t)attr.st_blksize;
 #endif
 
 #if ALLOCA_LIMIT > 0
 	if (blksize > (size_t)ALLOCA_LIMIT) {
 		blksize = (size_t)ALLOCA_LIMIT;
-		blksize -= blksize % sizeof(((struct libsha1_state)NULL)->chunk);
+		blksize -= blksize % sizeof(((struct libsha1_state *)NULL)->chunk);
 		if (!blksize)
-			blksize = sizeof(((struct libsha1_state)NULL)->chunk);
+			blksize = sizeof(((struct libsha1_state *)NULL)->chunk);
 	}
 # if defined(__clang__)
 	/* We are using a limit so it's just like declaring an array

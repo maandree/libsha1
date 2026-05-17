@@ -5,17 +5,17 @@
 size_t
 libsha1_marshal(const struct libsha1_state *restrict state, void *restrict buf_)
 {
-	char *restrict buf = buf_;
+	unsigned char *restrict buf = buf_;
 	size_t off = 0;
 
 	if (buf)
-		*(int *)buf = 1; /* version */
+		memcpy(buf, &(int){1}, sizeof(int));
 	off += sizeof(int);
 	if (buf)
-		*(enum libsha1_algorithm *)&buf[off] = state->algorithm;
+		memcpy(&buf[off], &state->algorithm, sizeof(enum libsha1_algorithm));
 	off += sizeof(enum libsha1_algorithm);
 	if (buf)
-		*(size_t *)&buf[off] = state->message_size;
+		memcpy(&buf[off], &state->message_size, sizeof(size_t));
 	off += sizeof(size_t);
 
 	if (buf)

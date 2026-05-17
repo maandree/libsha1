@@ -81,7 +81,7 @@ SRC = $(OBJ:.o=.c)
 
 
 all: libsha1.a libsha1.$(LIBEXT) test
-$(OBJ): $(HDR)
+$(OBJ) test.o: $(HDR)
 $(LOBJ): $(HDR)
 
 .c.o:
